@@ -39,4 +39,8 @@ env/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Sensitive files
+commons/oauth2/credentials.json
+commons/oauth2/token.json 
