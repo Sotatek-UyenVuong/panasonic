@@ -37,21 +37,26 @@ class PDFUploadResponse(BaseModel):
 def save_processed_response(document_id: str, pdf_url: str, pages: List[dict], timestamp: str = None):
     """Save processed response to JSON file."""
     try:
-        # Tạo thư mục data nếu chưa tồn tại
-        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+        # Create data directory if it doesn't exist
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
         os.makedirs(data_dir, exist_ok=True)
         
         # Generate timestamp if not provided
         if not timestamp:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             
-        # Tạo tên file
-        filename = f"processed_response_{timestamp}.json"
-        filepath = os.path.join(data_dir, filename)
+        # Create filenames with document_id
+        json_filename = f"processed_response_{document_id}_{timestamp}.json"
+        documents_filename = f"documents_{document_id}.json"
+        vector_filename = f"vector_{document_id}.pkl"
         
-        logger.info(f"Saving processed response to {filepath}")
+        json_filepath = os.path.join(data_dir, json_filename)
+        documents_filepath = os.path.join(data_dir, documents_filename)
+        vector_filepath = os.path.join(data_dir, vector_filename)
         
-        # Cấu trúc dữ liệu đã xử lý
+        logger.info(f"Saving processed response to {json_filepath}")
+        
+        # Structure processed data
         processed_data = {
             "document_id": document_id,
             "pdf_url": pdf_url,
@@ -59,30 +64,29 @@ def save_processed_response(document_id: str, pdf_url: str, pages: List[dict], t
             "pages": pages
         }
         
-        # Lưu vào file JSON với encoding utf-8
-        with open(filepath, 'w', encoding='utf-8') as f:
+        # Save to JSON file with utf-8 encoding
+        with open(json_filepath, 'w', encoding='utf-8') as f:
             json.dump(processed_data, f, ensure_ascii=False, indent=2)
             
-        logger.info(f"Successfully saved processed response to {filepath}")
-        return filepath
+        logger.info(f"Successfully saved processed response to {json_filepath}")
+        return json_filepath, documents_filepath, vector_filepath
         
     except Exception as e:
         logger.error(f"Error saving processed response to JSON: {str(e)}", exc_info=True)
         raise
 
-def process_chunks_and_embeddings(json_filepath: str):
+def process_chunks_and_embeddings(json_filepath: str, documents_filepath: str, vector_filepath: str):
     """Process chunks and create embeddings after saving JSON file."""
     try:
         # Step 1: Process chunks using chunk.py
         logger.info("Processing chunks from JSON file")
-        documents_json_path = "/Users/uyenvuong/panasonic/data/documents.json"
-        process_json_file(json_filepath, documents_json_path)
-        logger.info(f"Successfully created chunks in {documents_json_path}")
+        process_json_file(json_filepath, documents_filepath)
+        logger.info(f"Successfully created chunks in {documents_filepath}")
 
         # Step 2: Create embeddings using embed_chunk.py
         logger.info("Creating embeddings from chunks")
         embed_script_path = "/Users/uyenvuong/panasonic/scripts/embed_chunk.py"
-        result = subprocess.run(['python', embed_script_path], capture_output=True, text=True)
+        result = subprocess.run(['python', embed_script_path, documents_filepath, vector_filepath], capture_output=True, text=True)
         
         if result.returncode == 0:
             logger.info("Successfully created embeddings")
@@ -147,7 +151,7 @@ async def upload_pdf(request: PDFUploadRequest):
             created_page = await create_page(
                 document_id=document_id,
                 page_id=page_id,
-                page_number=page.index + 1,  # Convert 0-based index to 1-based page number
+                page_number=page.index + 1,
                 markdown=page.markdown,
                 images=images
             )
@@ -173,15 +177,21 @@ async def upload_pdf(request: PDFUploadRequest):
         # Save processed response to JSON
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         try:
-            json_filepath = save_processed_response(
+            json_filepath, documents_filepath, vector_filepath = save_processed_response(
                 document_id=document_id,
                 pdf_url=request.pdf_url,
                 pages=processed_pages,
                 timestamp=timestamp
             )
             
-            # Process chunks and create embeddings
-            process_chunks_and_embeddings(json_filepath)
+            # Process chunks and create embeddings with unique file paths
+            process_chunks_and_embeddings(json_filepath, documents_filepath, vector_filepath)
+            
+            # Store the file paths in the document record
+            await update_document(document_id, {
+                "documents_path": documents_filepath,
+                "vector_path": vector_filepath
+            })
             
         except Exception as e:
             logger.error(f"Failed to process chunks and embeddings: {str(e)}", exc_info=True)

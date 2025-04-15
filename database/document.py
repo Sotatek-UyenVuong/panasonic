@@ -20,7 +20,9 @@ async def create_document(document_id: str, link_document: str, model: Optional[
         document = DocumentModel(
             document_id=document_id,
             link_document=link_document,
-            model="mistral-ocr-latest"
+            model="mistral-ocr-latest",
+            documents_path=None,  # Initialize as None
+            vector_path=None      # Initialize as None
         )
         created_document = await document_collection.create(document)
         if not created_document:
@@ -38,13 +40,13 @@ async def get_document_by_id(document_id: str) -> Optional[DocumentModel]:
 async def get_all_documents() -> List[DocumentModel]:
     return await document_collection.find_all().to_list()
 
-async def update_document(document_id: str, link_document: str) -> Optional[DocumentModel]:
-    update_query = {
-        "$set": {
-            "link_document": link_document,
-            "updated_at": datetime.utcnow()
-        }
-    }
+async def update_document(document_id: str, update_data: dict) -> Optional[DocumentModel]:
+    """
+    Update document with new data
+    update_data can include: link_document, documents_path, vector_path
+    """
+    update_data["updated_at"] = datetime.utcnow()
+    update_query = {"$set": update_data}
     
     document = await document_collection.find_one({"document_id": document_id})
     if not document:

@@ -251,10 +251,13 @@
         /* Image styles */
         .message img {
             max-width: 100%;
+            height: auto;
             border-radius: 8px;
             margin: 10px 0;
             cursor: pointer;
             transition: transform 0.2s ease;
+            display: block;
+            object-fit: contain;
         }
 
         .message img:hover {
@@ -279,12 +282,16 @@
             max-width: 90%;
             max-height: 90vh;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-image {
             max-width: 100%;
             max-height: 90vh;
             border-radius: 8px;
+            object-fit: contain;
         }
 
         .close-modal {
@@ -301,19 +308,24 @@
             cursor: pointer;
         }
 
-        /* Add new styles for image loading */
+        /* Chat image container styles */
         .chat-image-container {
             position: relative;
-            display: inline-block;
+            display: block;
             min-width: 100px;
             min-height: 100px;
             margin: 10px 0;
+            background: #fff;
+            overflow: hidden;
         }
 
         .chat-image {
             max-width: 100%;
+            height: auto;
             border-radius: 8px;
             transition: opacity 0.3s ease;
+            display: block;
+            object-fit: contain;
         }
 
         .image-loading {
@@ -327,6 +339,7 @@
             border-top: 4px solid #4A90E2;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            z-index: 1;
         }
 
         .image-placeholder {
@@ -339,6 +352,17 @@
             justify-content: center;
             color: #4A90E2;
             font-size: 14px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .image-error {
+            background: rgba(255, 82, 82, 0.1);
+            color: #FF5252;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
         }
 
         @keyframes spin {
@@ -561,7 +585,7 @@
             addMessage(message, true);
             
             try {
-                const response = await fetch('/v1/chat-streamv2', {
+                const response = await fetch('/v1/chat/chat-streamv2', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -582,6 +606,7 @@
                 
                 let fullResponse = '';
                 let imageMap = new Map(); // Store image placeholders and their data
+                let imageCache = new Map(); // Cache cho ảnh
                 
                 while (true) {
                     const { value, done } = await reader.read();
@@ -608,22 +633,134 @@
                                         return `<a href="#" class="page-reference" data-page="${pageNum}">[Page ${pageNum}]</a>`;
                                     });
                                     
-                                    // Then process image references
+                                    // Then process image references and start loading images immediately
                                     const imgRegex = /!\[(.*?)\]\((.*?)\)/g;
-                                    processedResponse = processedResponse.replace(imgRegex, (match, alt, imgId) => {
+                                    let match;
+                                    while ((match = imgRegex.exec(fullResponse)) !== null) {
+                                        const [fullMatch, alt, imgId] = match;
                                         const placeholderId = `img-placeholder-${imgId}`;
+                                        
+                                        // Nếu ảnh đã có trong cache
+                                        if (imageCache.has(imgId)) {
+                                            processedResponse = processedResponse.replace(
+                                                fullMatch,
+                                                `<img src="${imageCache.get(imgId)}" alt="${imgId}" class="chat-image" style="max-width: 100%" onclick="showImageModal('${imageCache.get(imgId)}')">`
+                                            );
+                                            continue;
+                                        }
+
+                                        // If we haven't created a placeholder for this image yet
                                         if (!imageMap.has(imgId)) {
                                             imageMap.set(imgId, {
                                                 placeholder: `<div class="chat-image-container" id="${placeholderId}">
-                                                    <div class="image-placeholder">
+                                                    <div class="image-loading-container">
                                                         <div class="image-loading"></div>
-                                                        Loading image...
+                                                        <div class="loading-text">Loading image...</div>
                                                     </div>
                                                 </div>`
                                             });
+                                            
+                                            // Start loading the image immediately with timeout
+                                            const timeoutPromise = new Promise((_, reject) => {
+                                                setTimeout(() => reject(new Error('Request timeout')), 10000);
+                                            });
+
+                                            Promise.race([
+                                                fetch(`/v1/chat/image/${encodeURIComponent(chatbotId)}/${encodeURIComponent(imgId)}`),
+                                                timeoutPromise
+                                            ])
+                                                .then(response => {
+                                                    if (!response.ok) {
+                                                        throw new Error(`HTTP error! status: ${response.status}`);
+                                                    }
+                                                    return response.text();
+                                                })
+                                                .then(text => {
+                                                    try {
+                                                        return JSON.parse(text);
+                                                    } catch (e) {
+                                                        throw new Error('Invalid JSON response');
+                                                    }
+                                                })
+                                                .then(imageData => {
+                                                    if (!imageData || !imageData.image_b64) {
+                                                        throw new Error('Invalid image data received');
+                                                    }
+
+                                                    const placeholder = document.getElementById(placeholderId);
+                                                    if (!placeholder) {
+                                                        return;
+                                                    }
+
+                                                    // Cache ảnh
+                                                    imageCache.set(imgId, imageData.image_b64);
+
+                                                    // Tạo image element
+                                                    const imgElement = new Image();
+                                                    imgElement.onload = () => {
+                                                        placeholder.innerHTML = '';
+                                                        imgElement.className = 'chat-image';
+                                                        imgElement.style.maxWidth = '100%';
+                                                        imgElement.onclick = () => showImageModal(imageData.image_b64);
+                                                        placeholder.appendChild(imgElement);
+                                                    };
+
+                                                    // Set source sau khi đã setup onload
+                                                    imgElement.src = imageData.image_b64;
+                                                    imgElement.alt = imgId;
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error loading image:', error);
+                                                    const placeholder = document.getElementById(placeholderId);
+                                                    if (placeholder) {
+                                                        placeholder.innerHTML = `
+                                                            <div class="image-error">
+                                                                Failed to load image: ${error.message}
+                                                                <button onclick="retryLoadImage('${placeholderId}', '${imgId}')">
+                                                                    Retry
+                                                                </button>
+                                                            </div>`;
+                                                    }
+                                                });
                                         }
-                                        return imageMap.get(imgId).placeholder;
-                                    });
+                                        
+                                        processedResponse = processedResponse.replace(
+                                            fullMatch,
+                                            imageMap.get(imgId).placeholder
+                                        );
+                                    }
+                                    
+                                    // Thêm styles cho loading indicator
+                                    const style = document.createElement('style');
+                                    style.textContent = `
+                                        .image-loading-container {
+                                            display: flex;
+                                            flex-direction: column;
+                                            align-items: center;
+                                            justify-content: center;
+                                            padding: 20px;
+                                            background: rgba(0,0,0,0.05);
+                                            border-radius: 8px;
+                                        }
+                                        .image-loading {
+                                            width: 40px;
+                                            height: 40px;
+                                            border: 4px solid #f3f3f3;
+                                            border-top: 4px solid #3498db;
+                                            border-radius: 50%;
+                                            animation: spin 1s linear infinite;
+                                            margin-bottom: 10px;
+                                        }
+                                        .loading-text {
+                                            color: #666;
+                                            font-size: 14px;
+                                        }
+                                        @keyframes spin {
+                                            0% { transform: rotate(0deg); }
+                                            100% { transform: rotate(360deg); }
+                                        }
+                                    `;
+                                    document.head.appendChild(style);
                                     
                                     // Parse as markdown after all replacements
                                     currentMessageDiv.innerHTML = marked.parse(processedResponse);
@@ -638,30 +775,7 @@
                                     });
                                 }
 
-                                // Handle final response with images
-                                if (data.done && data.images) {
-                                    data.images.forEach(img => {
-                                        const imgId = img.id;
-                                        const placeholderId = `img-placeholder-${imgId}`;
-                                        const placeholder = document.getElementById(placeholderId);
-                                        if (placeholder) {
-                                            // Create image element with base64 data
-                                            const imgElement = document.createElement('img');
-                                            imgElement.src = img.image_b64; // Direct base64 data
-                                            imgElement.alt = imgId;
-                                            imgElement.className = 'chat-image';
-                                            imgElement.style.maxWidth = '100%';
-                                            imgElement.onclick = () => showImageModal(img.image_b64);
-                                            
-                                            // Replace placeholder with actual image
-                                            placeholder.innerHTML = '';
-                                            placeholder.appendChild(imgElement);
-                                        }
-                                    });
-                                }
-                                
-                                currentMessageDiv.scrollIntoView({ behavior: 'smooth' });
-                                
+                                // No need to handle images in the final response since we're loading them progressively
                                 if (data.done) {
                                     break;
                                 }

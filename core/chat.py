@@ -11,30 +11,41 @@ from llama_index.core.llms import ChatMessage, MessageRole
 from constants.LLM_models import Provider, MODELS, ModelName
 from openai import OpenAI
 import time
+from database.document import get_document_by_id
+import asyncio
 
 load_dotenv()
 
 API_KEY = os.getenv("COHERE_API_KEY")
 
-chunks, embeddings = load_vector_database()
+async def get_document_paths(document_id):
+    """Get document and vector paths for a given document ID"""
+    document = await get_document_by_id(document_id)
+    if not document:
+        return None, None
+    return document.documents_path, document.vector_path
 
-def chat(message, chat_history=None, model="command-r-plus-04-2024"):
+async def chat(message, document_id, chat_history=None, model="command-r-plus-04-2024"):
     client = Client(api_key=API_KEY)
     
     if chat_history is None:
         chat_history = []
     
+    documents_path, _ = await get_document_paths(document_id)
+    if not documents_path:
+        raise ValueError(f"No document found for ID: {document_id}")
+        
     response = client.chat(
         message=message,
         model=model,
         preamble=PROMPT_CHAT_SYSTEM,
         chat_history=chat_history,
-        documents=load_documents()
+        documents=load_documents(documents_path)
     )
     
     return response
 
-def chat_stream(query, chat_history=None, model="command-r-plus-04-2024"):
+async def chat_stream(query, document_id, chat_history=None, model="command-r-plus-04-2024"):
     co = ClientV2(api_key=API_KEY)
     
     message = [{"role": "system", "content": PROMPT_CHAT_SYSTEM}]
@@ -46,7 +57,11 @@ def chat_stream(query, chat_history=None, model="command-r-plus-04-2024"):
         
     messages = message + [{"role": "user", "content": query}]
     
-    results = retrieve_and_rerank(query, chunks, embeddings)
+    documents_path, vector_path = await get_document_paths(document_id)
+    if not documents_path or not vector_path:
+        raise ValueError(f"No document found for ID: {document_id}")
+        
+    results = retrieve_and_rerank(query, documents_path, vector_path)
     
     documents = []
     for idx, result in enumerate(results):
@@ -68,7 +83,7 @@ def chat_stream(query, chat_history=None, model="command-r-plus-04-2024"):
     
     return stream
 
-def chat_streamv2(query, chat_history=None, model_name="CLAUDE_3_7_SONNET", temperature=0.0):
+async def chat_streamv2(query, document_id, chat_history=None, model_name="CLAUDE_3_7_SONNET", temperature=0.0):
     try:
         # Get provider and model config
         model_enum = ModelName[model_name]  # Convert string to enum using name
@@ -86,11 +101,12 @@ def chat_streamv2(query, chat_history=None, model_name="CLAUDE_3_7_SONNET", temp
         # Create system and user messages
         system_prompt = PROMPT_CHAT_SYSTEM
         
-        # Try to get context if possible, but don't require it
+        # Get document paths and retrieve context
         context_str = "[]"
         try:
-            if chunks is not None and embeddings is not None:
-                results = retrieve_and_rerank(query, chunks, embeddings)
+            documents_path, vector_path = await get_document_paths(document_id)
+            if documents_path and vector_path:
+                results = retrieve_and_rerank(query, documents_path, vector_path)
                 if results:
                     documents = [{"title": f"chunk_{idx + 1}", "content": result[0]} 
                                for idx, result in enumerate(results)]

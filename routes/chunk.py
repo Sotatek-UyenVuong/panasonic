@@ -122,23 +122,3 @@ def process_json_file(json_file_path: str, output_path: str) -> List[Dict]:
     except Exception as e:
         logger.error(f"Error processing JSON file: {str(e)}", exc_info=True)
         raise
-
-if __name__ == "__main__":
-    try:
-        # Input and output file paths
-        json_file = "/Users/uyenvuong/panasonic/routes/data/processed_response_20250413_221803.json"
-        output_file = "/Users/uyenvuong/panasonic/data/documents.json"
-        
-        # Process and save chunks
-        chunks = process_json_file(json_file, output_file)
-        
-        # Print results
-        print(f"\nProcessed {len(chunks)} chunks and saved to {output_file}")
-        for i, chunk in enumerate(chunks, 1):
-            print(f"\nChunk {i}:")
-            print(f"Title: {chunk['title']}")
-            print(f"Snippet: {chunk['snippet'][:100]}...")
-    except Exception as e:
-        logger.error(f"Error in main execution: {str(e)}", exc_info=True)
-        print(f"Error: {str(e)}")
-        raise 

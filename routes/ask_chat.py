@@ -110,8 +110,10 @@ async def chat_stream_endpoint(chat_request: ChatStreamRequest):
                     # Convert model name to enum
                     model_enum = get_model_enum(chat_request.model_name)
                     
-                    response = chat_streamv2(
+                    # Get response generator
+                    response_generator = chat_streamv2(
                         query=chat_request.query,
+                        document_id=chatbot.document.id_document,
                         chat_history=formatted_history,
                         model_name=model_enum.name
                     )
@@ -120,7 +122,7 @@ async def chat_stream_endpoint(chat_request: ChatStreamRequest):
                     provider = MODELS[model_enum]["provider"]
                     
                     if provider == Provider.ANTHROPIC:
-                        for chunk in response:
+                        async for chunk in response_generator:
                             # Parse the JSON string from chat.py
                             if chunk:
                                 try:
@@ -298,18 +300,20 @@ async def chat_stream_v2_endpoint(chat_request: ChatMessage):
         async def generate():
             nonlocal answer
             try:
-                stream = chat_streamv2(
+                # Get response generator
+                response_generator = chat_streamv2(
                     query=chat_request.query,
+                    document_id=chatbot.document.id_document,
                     chat_history=formatted_history,
                     model_name=chat_request.model_name
                 )
                 
-                if stream is None:
+                if response_generator is None:
                     logger.error("Chat stream returned None")
                     yield f"data: {json.dumps({'error': 'Chat stream initialization failed'})}\n\n"
                     return
 
-                for chunk in stream:
+                async for chunk in response_generator:
                     if chunk:
                         try:
                             data = json.loads(chunk)
@@ -365,6 +369,33 @@ async def chat_stream_v2_endpoint(chat_request: ChatMessage):
         error_msg = str(e)
         logger.error(f"Error in chat_stream_endpoint: {error_msg}")
         raise HTTPException(status_code=500, detail=error_msg)
+
+@router.get("/image/{chatbot_id}/{image_id}")
+async def get_image(chatbot_id: str, image_id: str):
+    try:
+        # Get chatbot from database
+        chatbot = await get_chatbot_by_id(chatbot_id)
+        if not chatbot:
+            raise HTTPException(status_code=404, detail="Chatbot not found")
+            
+        # Get all pages for this document
+        pages = await get_pages_by_document_id(chatbot.document.id_document)
+        if not pages:
+            raise HTTPException(status_code=404, detail="No pages found for document")
+            
+        # Look for the image in all pages
+        for page in pages:
+            if page.images:
+                for img in page.images:
+                    # Try both with and without file extension
+                    if img.id == image_id or img.id.split('.')[0] == image_id:
+                        return {"image_b64": img.image_b64}
+                        
+        raise HTTPException(status_code=404, detail=f"Image {image_id} not found")
+        
+    except Exception as e:
+        logger.error(f"Error getting image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 async def extract_images_from_text(text: str, document_id: str) -> List[dict]:
     """Extract image information from text and fetch from database."""

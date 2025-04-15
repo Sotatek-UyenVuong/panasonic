@@ -54,7 +54,7 @@ app.add_middleware(
 # Configure API routes
 v1_router = APIRouter(prefix="/v1")
 v1_router.include_router(demoRouter, tags=["Demo"])
-v1_router.include_router(askChatRouter, tags=["Ask Chat"])
+v1_router.include_router(askChatRouter, prefix="/chat", tags=["Ask Chat"])
 v1_router.include_router(uploadRouter, prefix="/pdf", tags=["PDF Processing"])
 v1_router.include_router(chatbotRouter, prefix="/chatbot", tags=["Chatbot"])
 app.include_router(v1_router)
