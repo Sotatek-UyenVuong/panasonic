@@ -1,7 +1,12 @@
+#!/bin/bash
+
 APP_MODULE="app:app"
 HOST="0.0.0.0"
-PORT=${1:-1118}
+PORT=${1:-1117}
 WORKERS=1
+
+# Activate virtual environment
+source venv/bin/activate
 
 kill_processes() {
     echo "Finding and stopping processes running on port ${PORT}..."
@@ -32,20 +37,16 @@ kill_processes() {
 cleanup() {
     echo "Cleaning up..."
     [ ! -z "$UVICORN_PID" ] && kill $UVICORN_PID
+    deactivate
     exit 0
 }
 
 trap cleanup SIGINT SIGTERM
 
-# Kiểm tra và cài đặt uvicorn nếu cần
-if ! command -v uvicorn &> /dev/null; then
-    echo "uvicorn not found. Installing..."
-    pip install uvicorn
-fi
-
 kill_processes
 
-uvicorn $APP_MODULE \
+# Use the virtual environment's uvicorn
+./venv/bin/uvicorn $APP_MODULE \
     --host $HOST \
     --port $PORT \
     --workers $WORKERS \

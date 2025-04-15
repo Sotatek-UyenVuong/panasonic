@@ -11,7 +11,7 @@ API_KEY = os.getenv("COHERE_API_KEY")
 co = cohere.ClientV2(api_key=API_KEY)
 
 def load_documents():
-    with open('/Users/uyenbaby/Downloads/panasonic_reasoning/data/documents.json', 'r', encoding='utf-8') as f:
+    with open('/Users/uyenvuong/panasonic/data/documents.json', 'r', encoding='utf-8') as f:
         documents = json.load(f)
     
     chunks = []
@@ -34,14 +34,14 @@ def batch_embed(texts, batch_size=96):
         all_embeddings.extend(response.embeddings.float)
     return all_embeddings
 
-def save_vector_database(vector_database, filepath='/Users/uyenbaby/Downloads/panasonic_reasoning/data/vector.pkl'):
+def save_vector_database(vector_database, filepath='/Users/uyenvuong/panasonic/data/vector.pkl'):
     """Lưu vector database vào file"""
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, 'wb') as f:
         pickle.dump(vector_database, f)
     print(f"Đã lưu vector database vào {filepath}")
 
-def load_vector_database(filepath='/Users/uyenbaby/Downloads/panasonic_reasoning/data/vector.pkl'):
+def load_vector_database(filepath='/Users/uyenvuong/panasonic/data/vector.pkl'):
     """Load vector database từ file"""
     if not os.path.exists(filepath):
         return None

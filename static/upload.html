@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パナソニック パソコン取扱説明書アシスタント - アップロード</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    <link rel="shortcut icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    <link rel="apple-touch-icon" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #E3F2FD 0%, #FFF8E1 25%, #B2DFFC 50%, #FFE082 75%, #64B5F6 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-status-wrapper {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 225, 0.85));
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12), 0 4px 8px rgba(255, 193, 7, 0.06);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 20px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #2B5C97;
+            font-size: 24px;
+            margin: 0 0 30px 0;
+            text-align: center;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .progress-step.completed {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .progress-step.error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4A90E2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .step-title {
+            font-weight: 500;
+            color: #2B5C97;
+            flex: 1;
+        }
+
+        .step-status {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .step-details {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: transparent;
+            border: 1px solid #4A90E2;
+            color: #4A90E2;
+        }
+
+        button.secondary:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .error-message {
+            color: #FF5252;
+            background: rgba(255, 82, 82, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-icon {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-status-wrapper">
+        <h1>パナソニック パソコン取扱説明書アシスタント</h1>
+        
+        <div class="progress-container">
+            <!-- PDF Upload Step -->
+            <div class="progress-step" id="upload-step">
+                <div class="step-header">
+                    <div class="step-icon">1</div>
+                    <div class="step-title">PDFアップロード</div>
+                    <div class="step-status" id="upload-status">処理中...</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="upload-progress"></div>
+                </div>
+                <div class="step-details" id="upload-details">PDFファイルをアップロードしています...</div>
+            </div>
+
+            <!-- OCR Processing Step -->
+            <div class="progress-step" id="ocr-step">
+                <div class="step-header">
+                    <div class="step-icon">2</div>
+                    <div class="step-title">OCR処理</div>
+                    <div class="step-status" id="ocr-status">待機中...</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="ocr-progress"></div>
+                </div>
+                <div class="step-details" id="ocr-details">OCR処理を待っています...</div>
+            </div>
+
+            <!-- Database Processing Step -->
+            <div class="progress-step" id="db-step">
+                <div class="step-header">
+                    <div class="step-icon">3</div>
+                    <div class="step-title">データベース処理</div>
+                    <div class="step-status" id="db-status">待機中...</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="db-progress"></div>
+                </div>
+                <div class="step-details" id="db-details">データベース処理を待っています...</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button onclick="cancelUpload()" class="secondary" id="cancel-btn">
+                <i class="fas fa-times"></i>
+                キャンセル
+            </button>
+            <button onclick="proceedToChat()" id="proceed-btn" disabled>
+                <i class="fas fa-robot"></i>
+                チャットボットを作成
+            </button>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
+    </div>
+
+    <script>
+        let documentId = null;
+        let uploadCancelled = false;
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const pdfUrl = urlParams.get('pdf_url');
+
+        if (!pdfUrl) {
+            window.location.href = '/v1/static/index.html';
+        }
+
+        // Start upload process
+        window.addEventListener('load', startUpload);
+
+        async function startUpload() {
+            const uploadStep = document.getElementById('upload-step');
+            const uploadProgress = document.getElementById('upload-progress');
+            const uploadStatus = document.getElementById('upload-status');
+            const uploadDetails = document.getElementById('upload-details');
+
+            try {
+                uploadStep.classList.add('active');
+                
+                // Simulate upload progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 10;
+                        uploadProgress.style.width = `${progress}%`;
+                    }
+                }, 500);
+
+                // Start actual upload
+                const response = await fetch('/v1/pdf/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pdf_url: pdfUrl })
+                });
+
+                clearInterval(progressInterval);
+
+                if (!response.ok) {
+                    throw new Error('アップロードに失敗しました');
+                }
+
+                const data = await response.json();
+                documentId = data.document_id;
+
+                // Complete upload step
+                uploadProgress.style.width = '100%';
+                uploadStep.classList.remove('active');
+                uploadStep.classList.add('completed');
+                uploadStatus.textContent = '完了';
+                uploadDetails.textContent = 'PDFのアップロードが完了しました';
+
+                // Start OCR processing
+                await startOCRProcessing();
+
+            } catch (error) {
+                console.error('Error:', error);
+                handleError('アップロード中にエラーが発生しました: ' + error.message);
+                uploadStep.classList.add('error');
+            }
+        }
+
+        async function startOCRProcessing() {
+            const ocrStep = document.getElementById('ocr-step');
+            const ocrProgress = document.getElementById('ocr-progress');
+            const ocrStatus = document.getElementById('ocr-status');
+            const ocrDetails = document.getElementById('ocr-details');
+
+            try {
+                ocrStep.classList.add('active');
+                ocrStatus.textContent = '処理中...';
+                ocrDetails.textContent = 'OCR処理を実行中です...';
+
+                // Simulate OCR progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 5;
+                        ocrProgress.style.width = `${progress}%`;
+                    }
+                }, 1000);
+
+                // Wait for OCR processing (you might want to implement a real status check here)
+                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                clearInterval(progressInterval);
+                ocrProgress.style.width = '100%';
+                ocrStep.classList.remove('active');
+                ocrStep.classList.add('completed');
+                ocrStatus.textContent = '完了';
+                ocrDetails.textContent = 'OCR処理が完了しました';
+
+                // Start database processing
+                await startDatabaseProcessing();
+
+            } catch (error) {
+                console.error('Error:', error);
+                handleError('OCR処理中にエラーが発生しました: ' + error.message);
+                ocrStep.classList.add('error');
+            }
+        }
+
+        async function startDatabaseProcessing() {
+            const dbStep = document.getElementById('db-step');
+            const dbProgress = document.getElementById('db-progress');
+            const dbStatus = document.getElementById('db-status');
+            const dbDetails = document.getElementById('db-details');
+            const proceedBtn = document.getElementById('proceed-btn');
+
+            try {
+                dbStep.classList.add('active');
+                dbStatus.textContent = '処理中...';
+                dbDetails.textContent = 'データベースに保存中です...';
+
+                // Simulate database processing
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 10;
+                        dbProgress.style.width = `${progress}%`;
+                    }
+                }, 300);
+
+                // Wait for database processing (you might want to implement a real status check here)
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                clearInterval(progressInterval);
+                dbProgress.style.width = '100%';
+                dbStep.classList.remove('active');
+                dbStep.classList.add('completed');
+                dbStatus.textContent = '完了';
+                dbDetails.textContent = 'データベース処理が完了しました';
+
+                // Enable proceed button
+                proceedBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Error:', error);
+                handleError('データベース処理中にエラーが発生しました: ' + error.message);
+                dbStep.classList.add('error');
+            }
+        }
+
+        async function proceedToChat() {
+            if (!documentId) {
+                handleError('Document IDが見つかりません');
+                return;
+            }
+
+            const proceedBtn = document.getElementById('proceed-btn');
+            proceedBtn.disabled = true;
+
+            try {
+                const response = await fetch('/v1/chatbot/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ document_id: documentId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('チャットボットの作成に失敗しました');
+                }
+
+                const data = await response.json();
+                window.location.href = `/v1/static/chat.html?chatbot_id=${data.chatbot_id}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                handleError(error.message || 'チャットボットの作成に失敗しました');
+                proceedBtn.disabled = false;
+            }
+        }
+
+        function cancelUpload() {
+            uploadCancelled = true;
+            window.location.href = '/v1/static/index.html';
+        }
+
+        function handleError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

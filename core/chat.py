@@ -83,21 +83,26 @@ def chat_streamv2(query, chat_history=None, model_name="CLAUDE_3_7_SONNET", temp
                     role = "user" if msg["role"] == "user" else "assistant"
                     formatted_messages.append({"role": role, "content": msg["content"].strip()})
         
-        # Get context from retrieve_and_rerank
-        results = retrieve_and_rerank(query, chunks, embeddings)
-        
-        # Format documents
-        documents = []
-        for idx, result in enumerate(results):
-            documents.append({
-                "title": f"chunk_{idx + 1}",
-                "content": result[0]
-            })
-        
         # Create system and user messages
-        context_str = json.dumps(documents, ensure_ascii=False)
         system_prompt = PROMPT_CHAT_SYSTEM
-        user_prompt = f"""Documents: {context_str}
+        
+        # Try to get context if possible, but don't require it
+        context_str = "[]"
+        try:
+            if chunks is not None and embeddings is not None:
+                results = retrieve_and_rerank(query, chunks, embeddings)
+                if results:
+                    documents = [{"title": f"chunk_{idx + 1}", "content": result[0]} 
+                               for idx, result in enumerate(results)]
+                    context_str = json.dumps(documents, ensure_ascii=False)
+        except Exception as e:
+            print(f"Warning: Could not retrieve context: {str(e)}")
+            # Continue without context
+        
+        # Construct user prompt with or without context
+        user_prompt = query
+        if context_str != "[]":
+            user_prompt = f"""Documents: {context_str}
 
 Question: {query}
 

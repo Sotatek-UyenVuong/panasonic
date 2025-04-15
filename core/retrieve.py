@@ -12,7 +12,7 @@ co = cohere.ClientV2(api_key=API_KEY)
 
 def load_documents():
     """Load documents từ JSON file"""
-    with open('/Users/uyenbaby/Downloads/panasonic_reasoning/data/documents.json', 'r', encoding='utf-8') as f:
+    with open('/Users/uyenvuong/panasonic/data/documents.json', 'r', encoding='utf-8') as f:
         documents = json.load(f)
     chunks = []
     for doc in documents:
@@ -20,7 +20,7 @@ def load_documents():
         chunks.append(chunk_text)
     return chunks
 
-def load_vector_database(filepath='/Users/uyenbaby/Downloads/panasonic_reasoning/data/vector.pkl'):
+def load_vector_database(filepath='/Users/uyenvuong/panasonic/data/vector.pkl'):
     """Load vector database từ file"""
     if not os.path.exists(filepath):
         return None, None

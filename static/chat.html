@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パナソニック パソコン取扱説明書アシスタント - チャット</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    <link rel="shortcut icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    <link rel="apple-touch-icon" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Copy all the chat-related styles from index.html */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(
+                135deg,
+                #E3F2FD 0%,
+                #FFF8E1 25%,
+                #B2DFFC 50%,
+                #FFE082 75%,
+                #64B5F6 100%
+            );
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container-wrapper {
+            display: flex;
+            width: 100%;
+            height: 90vh;
+            gap: 20px;
+        }
+
+        .pdf-viewer {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-wrapper {
+            flex: 1;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.92),
+                rgba(255, 248, 225, 0.85)
+            );
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 8px 32px rgba(31, 38, 135, 0.12),
+                0 4px 8px rgba(255, 193, 7, 0.06);
+            border-radius: 20px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        .chat-header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chat-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2B5C97;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .model-selector {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+
+        .model-button {
+            padding: 8px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            background: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-button.active {
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            color: white;
+            border-color: transparent;
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            line-height: 1.5;
+            animation: messageSlide 0.4s ease-out;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            color: white;
+            margin-left: auto;
+            max-width: 80%;
+        }
+
+        .bot-message {
+            color: #333;
+            max-width: 100%;
+            border-radius: 0;
+            padding: 0 0 15px 0;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        #send-button {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        #send-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 8px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #4A90E2;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .model-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 8px 0;
+            margin-top: 8px;
+            min-width: 200px;
+            display: none;
+        }
+
+        .model-dropdown.show {
+            display: block;
+        }
+
+        .model-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .model-option:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .model-option.selected {
+            background: rgba(74, 144, 226, 0.2);
+            font-weight: 500;
+        }
+
+        /* Image styles */
+        .message img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .message img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Modal styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 40px;
+            height: 40px;
+            background: #FF5252;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Add new styles for image loading */
+        .chat-image-container {
+            position: relative;
+            display: inline-block;
+            min-width: 100px;
+            min-height: 100px;
+            margin: 10px 0;
+        }
+
+        .chat-image {
+            max-width: 100%;
+            border-radius: 8px;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .image-placeholder {
+            background: rgba(74, 144, 226, 0.1);
+            border: 2px dashed #4A90E2;
+            border-radius: 8px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4A90E2;
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Debug panel styles */
+        .debug-panel {
+            display: none;
+        }
+
+        /* Add styles for page references */
+        .page-reference {
+            color: #4A90E2;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            background: rgba(74, 144, 226, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .page-reference:hover {
+            background: rgba(74, 144, 226, 0.2);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container-wrapper">
+        <div class="pdf-viewer">
+            <iframe id="pdf-viewer" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        <div class="chat-wrapper">
+            <div class="chat-header">
+                <div class="chat-header-top">
+                    <h1>パナソニック パソコン取扱説明書アシスタント</h1>
+                    <div class="model-selector">
+                        <div class="model-button" id="base-model-btn" onclick="toggleBaseModels()">
+                            <i class="fas fa-microchip"></i>
+                            <span>Base</span>
+                        </div>
+                        <div class="model-button" id="reasoning-model-btn" onclick="toggleReasoningModels()">
+                            <i class="fas fa-brain"></i>
+                            <span>Reasoning</span>
+                        </div>
+                        <div class="model-dropdown" id="base-models-dropdown">
+                            <div class="model-option" onclick="selectModel('GPT_4O_MINI')">GPT-4o Mini</div>
+                            <div class="model-option" onclick="selectModel('CLAUDE_3_5_HAIKU')">Claude 3.5 Haiku</div>
+                            <div class="model-option" onclick="selectModel('CLAUDE_3_5_SONNET')">Claude 3.5 Sonnet</div>
+                            <div class="model-option" onclick="selectModel('GEMINI_PRO_1_5')">Gemini Pro 1.5</div>
+                        </div>
+                        <div class="model-dropdown" id="reasoning-models-dropdown">
+                            <div class="model-option" onclick="selectModel('CLAUDE_3_7_SONNET')">Claude 3.7 Sonnet</div>
+                            <div class="model-option" onclick="selectModel('GEMINI_2_5_PRO_EXP_03_25')">Gemini 2.5 Pro</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="chat-container"></div>
+            
+            <div class="input-container">
+                <input type="text" id="message-input" placeholder="メッセージを入力してください...">
+                <button id="send-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="image-modal" id="imageModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeImageModal()">×</button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        let chatbotId = null;
+        let currentModel = 'default';
+        let chatHistory = [];
+
+        // Configure marked.js to handle line breaks
+        marked.setOptions({
+            breaks: true
+        });
+
+        // Get chatbot ID and load PDF
+        window.addEventListener('load', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            chatbotId = urlParams.get('chatbot_id');
+            if (!chatbotId) {
+                alert('チャットボットIDが見つかりません');
+                window.location.href = '/v1/static/index.html';
+                return;
+            }
+
+            // Fetch document URL directly from the correct endpoint
+            try {
+                const response = await fetch(`/v1/chatbot/${encodeURIComponent(chatbotId)}/document-url`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch document URL: ${response.status}`);
+                }
+                const documentInfo = await response.json();
+                
+                if (!documentInfo.link_document) {
+                    throw new Error('Document URL is missing');
+                }
+
+                // Load PDF into viewer
+                const pdfViewer = document.getElementById('pdf-viewer');
+                // Create a safe URL
+                const pdfUrl = new URL(documentInfo.link_document);
+                pdfViewer.src = pdfUrl.toString();
+                
+                // Add error handling for iframe loading
+                pdfViewer.onerror = () => {
+                    console.error('Failed to load PDF in viewer');
+                    alert('PDFの読み込みに失敗しました');
+                };
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('PDFの読み込みに失敗しました: ' + error.message);
+            }
+        });
+
+        function toggleBaseModels() {
+            const baseDropdown = document.getElementById('base-models-dropdown');
+            const reasoningDropdown = document.getElementById('reasoning-models-dropdown');
+            baseDropdown.classList.toggle('show');
+            reasoningDropdown.classList.remove('show');
+        }
+
+        function toggleReasoningModels() {
+            const baseDropdown = document.getElementById('base-models-dropdown');
+            const reasoningDropdown = document.getElementById('reasoning-models-dropdown');
+            reasoningDropdown.classList.toggle('show');
+            baseDropdown.classList.remove('show');
+        }
+
+        function selectModel(model) {
+            currentModel = model;
+            document.querySelectorAll('.model-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+            
+            // Update button text
+            const baseBtn = document.getElementById('base-model-btn');
+            const reasoningBtn = document.getElementById('reasoning-model-btn');
+            
+            if (model === 'CLAUDE_3_7_SONNET' || model === 'GEMINI_2_5_PRO_EXP_03_25') {
+                reasoningBtn.classList.add('active');
+                baseBtn.classList.remove('active');
+                reasoningBtn.querySelector('span').textContent = model.split('_')[0];
+            } else {
+                baseBtn.classList.add('active');
+                reasoningBtn.classList.remove('active');
+                baseBtn.querySelector('span').textContent = model.split('_')[0];
+            }
+        }
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            if (isUser) {
+                const userMessageContent = document.createElement('div');
+                userMessageContent.textContent = message;
+                messageDiv.appendChild(userMessageContent);
+            } else {
+                // Process page references before parsing markdown
+                const processedMessage = message.replace(/\[Page\s*(\d+)\]/g, (match, pageNum) => {
+                    return `<a href="#" class="page-reference" data-page="${pageNum}">[Page ${pageNum}]</a>`;
+                });
+                
+                messageDiv.innerHTML = marked.parse(processedMessage);
+                
+                // Add click handlers for page references
+                messageDiv.querySelectorAll('.page-reference').forEach(ref => {
+                    ref.onclick = (e) => {
+                        e.preventDefault();
+                        const pageNum = parseInt(ref.dataset.page);
+                        jumpToPage(pageNum);
+                    };
+                });
+                
+                // Add click handlers for images
+                messageDiv.querySelectorAll('img').forEach(img => {
+                    img.onclick = () => showImageModal(img.src);
+                });
+            }
+            
+            document.getElementById('chat-container').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function jumpToPage(pageNum) {
+            const pdfViewer = document.getElementById('pdf-viewer');
+            if (pdfViewer && pdfViewer.contentWindow) {
+                // Assuming the PDF viewer supports page navigation via URL hash
+                const currentSrc = pdfViewer.src;
+                const baseUrl = currentSrc.split('#')[0];
+                pdfViewer.src = `${baseUrl}#page=${pageNum}`;
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            messageInput.value = '';
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            
+            addMessage(message, true);
+            
+            try {
+                const response = await fetch('/v1/chat-streamv2', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: message,
+                        model_name: currentModel,
+                        chatbot_id: chatbotId
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                let currentMessageDiv = document.createElement('div');
+                currentMessageDiv.className = 'message bot-message';
+                document.getElementById('chat-container').appendChild(currentMessageDiv);
+                
+                let fullResponse = '';
+                let imageMap = new Map(); // Store image placeholders and their data
+                
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(5));
+                                
+                                if (data.error) {
+                                    currentMessageDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                                    break;
+                                }
+                                
+                                if (data.text) {
+                                    fullResponse += data.text;
+                                    
+                                    // First process page references
+                                    let processedResponse = fullResponse.replace(/\[Page\s*(\d+)\]/g, (match, pageNum) => {
+                                        return `<a href="#" class="page-reference" data-page="${pageNum}">[Page ${pageNum}]</a>`;
+                                    });
+                                    
+                                    // Then process image references
+                                    const imgRegex = /!\[(.*?)\]\((.*?)\)/g;
+                                    processedResponse = processedResponse.replace(imgRegex, (match, alt, imgId) => {
+                                        const placeholderId = `img-placeholder-${imgId}`;
+                                        if (!imageMap.has(imgId)) {
+                                            imageMap.set(imgId, {
+                                                placeholder: `<div class="chat-image-container" id="${placeholderId}">
+                                                    <div class="image-placeholder">
+                                                        <div class="image-loading"></div>
+                                                        Loading image...
+                                                    </div>
+                                                </div>`
+                                            });
+                                        }
+                                        return imageMap.get(imgId).placeholder;
+                                    });
+                                    
+                                    // Parse as markdown after all replacements
+                                    currentMessageDiv.innerHTML = marked.parse(processedResponse);
+                                    
+                                    // Re-add click handlers for page references after markdown parsing
+                                    currentMessageDiv.querySelectorAll('.page-reference').forEach(ref => {
+                                        ref.onclick = (e) => {
+                                            e.preventDefault();
+                                            const pageNum = parseInt(ref.dataset.page);
+                                            jumpToPage(pageNum);
+                                        };
+                                    });
+                                }
+
+                                // Handle final response with images
+                                if (data.done && data.images) {
+                                    data.images.forEach(img => {
+                                        const imgId = img.id;
+                                        const placeholderId = `img-placeholder-${imgId}`;
+                                        const placeholder = document.getElementById(placeholderId);
+                                        if (placeholder) {
+                                            // Create image element with base64 data
+                                            const imgElement = document.createElement('img');
+                                            imgElement.src = img.image_b64; // Direct base64 data
+                                            imgElement.alt = imgId;
+                                            imgElement.className = 'chat-image';
+                                            imgElement.style.maxWidth = '100%';
+                                            imgElement.onclick = () => showImageModal(img.image_b64);
+                                            
+                                            // Replace placeholder with actual image
+                                            placeholder.innerHTML = '';
+                                            placeholder.appendChild(imgElement);
+                                        }
+                                    });
+                                }
+                                
+                                currentMessageDiv.scrollIntoView({ behavior: 'smooth' });
+                                
+                                if (data.done) {
+                                    break;
+                                }
+                            } catch (e) {
+                                console.error('Error processing chunk:', e);
+                            }
+                        }
+                    }
+                }
+                
+                chatHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: fullResponse }
+                );
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('エラーが発生しました。もう一度お試しください。', false);
+            } finally {
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        function showImageModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = src;
+            modal.style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.model-selector')) {
+                document.querySelectorAll('.model-dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
+        });
+
+        // Handle Enter key
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Close image modal when clicking outside
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('imageModal')) {
+                closeImageModal();
+            }
+        });
+    </script>
+</body>
+</html> 

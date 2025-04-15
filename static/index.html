@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>パナソニック パソコン取扱説明書アシスタント</title>
     
-    <!-- Thêm favicon -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
     <link rel="shortcut icon" type="image/png" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
     <link rel="apple-touch-icon" href="https://visionjsc.com.vn/Uploads/images/ads/logo.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -24,13 +25,13 @@
                 #FFE082 75%,
                 #64B5F6 100%
             );
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        .chat-wrapper {
+        .upload-wrapper {
             background: linear-gradient(
                 135deg,
                 rgba(255, 255, 255, 0.92),
@@ -41,1250 +42,270 @@
             box-shadow: 
                 0 8px 32px rgba(31, 38, 135, 0.12),
                 0 4px 8px rgba(255, 193, 7, 0.06);
-            transition: transform 0.3s ease;
             width: 90%;
-            max-width: 800px;
+            max-width: 600px;
             border-radius: 20px;
             padding: 30px;
             box-sizing: border-box;
         }
 
-        .chat-wrapper:hover {
-            transform: translateY(-5px);
-        }
-
         h1 {
             color: #2B5C97;
             font-size: 24px;
-            margin: 0 0 8px 0;
-            text-shadow: 
-                0 2px 4px rgba(0, 0, 0, 0.05),
-                0 0 8px rgba(255, 167, 38, 0.1);
+            margin: 0 0 30px 0;
+            text-align: center;
         }
 
-        .subtitle {
-            color: #4A5B6E;
-            margin: 0 0 25px 0;
-            font-size: 16px;
+        .upload-section {
+            margin-bottom: 30px;
         }
 
-        #chat-container {
-            height: 500px;
-            overflow-y: auto;
-            padding: 20px 0;
-            margin-bottom: 20px;
-        }
-
-        .message {
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            border-radius: 15px;
-            max-width: 80%;
-            line-height: 1.3;
-            position: relative;
-            animation: messageSlide 0.4s ease-out;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .user-message {
-            background: linear-gradient(135deg, 
-                #4A90E2 0%,
-                #5C9EE7 45%,
-                #FFB74D 100%
-            );
-            box-shadow: 
-                0 4px 15px rgba(74, 144, 226, 0.2),
-                0 2px 4px rgba(255, 183, 77, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            margin-left: auto;
-        }
-
-        .bot-message {
-            background: linear-gradient(135deg,
-                #FFFFFF 0%,
-                #FFFDF7 50%,
-                #FFF8E1 100%
-            );
-            box-shadow: 
-                0 4px 15px rgba(136, 165, 191, 0.08),
-                0 2px 4px rgba(136, 165, 191, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            color: #333;
-        }
-
-        #input-container {
-            background: linear-gradient(
-                to bottom,
-                rgba(255, 255, 255, 0.5),
-                rgba(255, 255, 255, 0.3)
-            );
-            backdrop-filter: blur(8px);
-            border-top: 1px solid rgba(229, 229, 229, 0.3);
-            padding: 15px 0;
+        .input-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        #message-input {
-            flex-grow: 1;
+        input[type="text"] {
+            flex: 1;
             padding: 15px;
             border: 1px solid rgba(74, 144, 226, 0.2);
             border-radius: 12px;
             font-size: 15px;
-            outline: none;
             background: rgba(255, 255, 255, 0.7);
-            box-shadow: 
-                inset 0 2px 4px rgba(136, 165, 191, 0.06),
-                0 2px 4px rgba(136, 165, 191, 0.04);
-            transition: all 0.3s ease;
-        }
-
-        #message-input:focus {
-            background: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.95),
-                rgba(255, 255, 255, 0.85)
-            );
-            border-color: #FFA726;
-            box-shadow: 
-                0 0 0 3px rgba(255, 167, 38, 0.15),
-                0 4px 20px rgba(74, 144, 226, 0.1);
         }
 
         button {
-            padding: 15px;
-            background: linear-gradient(135deg,
-                #3B7DDB 0%,
-                #4A90E2 50%,
-                #FFA726 100%
-            );
-            box-shadow: 
-                0 4px 15px rgba(74, 144, 226, 0.25),
-                0 2px 4px rgba(255, 167, 38, 0.15);
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
             color: white;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        button:hover {
-            background: linear-gradient(135deg,
-                #FFA726 0%,
-                #4A90E2 50%,
-                #3B7DDB 100%
-            );
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(74, 144, 226, 0.3),
-                0 4px 8px rgba(74, 144, 226, 0.2);
-        }
-
-        /* Thêm icon cho nút gửi */
-        button::before {
-            content: '→';
-            font-size: 20px;
-        }
-
-        /* Product card styles */
-        .product-card {
-            background: linear-gradient(135deg,
-                #FFFFFF 0%,
-                #FFFDF7 50%,
-                #FFF8E1 100%
-            );
-            border: 1px solid rgba(255, 167, 38, 0.1);
-            box-shadow: 
-                0 8px 20px rgba(136, 165, 191, 0.06),
-                0 4px 8px rgba(136, 165, 191, 0.04);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 10px 0;
-            display: flex;
-            gap: 15px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 12px 30px rgba(74, 144, 226, 0.12),
-                0 6px 12px rgba(255, 167, 38, 0.08);
-        }
-
-        .product-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .product-info {
-            flex: 1;
-        }
-
-        .product-title {
-            font-weight: 600;
-            color: #2B5C97;
-            margin: 0 0 5px 0;
-        }
-
-        .product-price {
-            color: #FFA726;
-            font-weight: 600;
-            font-size: 1.1em;
-            text-shadow: 0 1px 2px rgba(255, 167, 38, 0.1);
-        }
-
-        .product-description {
-            color: #5A6B7B;
-            font-size: 0.9em;
-            margin: 5px 0;
-        }
-
-        /* Animations */
-        @keyframes messageSlide {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Thêm style cho typing indicator */
-        .typing-indicator {
-            background: linear-gradient(135deg,
-                rgba(74, 144, 226, 0.08) 0%,
-                rgba(255, 167, 38, 0.08) 100%
-            );
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(135deg,
-                #4A90E2 0%,
-                #FFA726 100%
-            );
-            border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out;
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
         }
 
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        /* Làm cho button disabled có style phù hợp */
         button:disabled {
-            opacity: 0.6;
+            opacity: 0.7;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* Thêm media queries cho responsive */
-        @media screen and (max-width: 768px) {
-            .chat-wrapper {
-                width: 95%;
-                padding: 20px;
-                margin: 10px;
-                height: 90vh;
-                display: flex;
-                flex-direction: column;
-            }
-
-            #chat-container {
-                height: calc(90vh - 180px); /* Điều chỉnh chiều cao tự động */
-                flex: 1;
-            }
-
-            .message {
-                max-width: 85%;
-                padding: 12px 15px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            .subtitle {
-                font-size: 14px;
-                margin-bottom: 15px;
-            }
+        .progress-section {
+            display: none;
+            margin-top: 20px;
         }
 
-        @media screen and (max-width: 480px) {
-            .chat-wrapper {
-                width: 100%;
-                padding: 15px;
-                margin: 0;
-                border-radius: 0;
-                height: 100vh;
-            }
-
-            #chat-container {
-                height: calc(100vh - 160px);
-            }
-
-            .message {
-                max-width: 90%;
-                font-size: 14px;
-            }
-
-            #message-input {
-                padding: 12px;
-                font-size: 14px;
-            }
-
-            button {
-                padding: 12px;
-                width: 45px;
-            }
-
-            .product-card {
-                flex-direction: column;
-            }
-
-            .product-image {
-                width: 100%;
-                height: 200px;
-            }
-        }
-
-        /* Thêm styles cho màn hình cao */
-        @media screen and (min-height: 1024px) {
-            .chat-wrapper {
-                height: 80vh;
-            }
-
-            #chat-container {
-                height: calc(80vh - 180px);
-            }
-        }
-
-        /* Thêm style cho hình ảnh trong bot message */
-        .bot-message img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 10px 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            display: block; /* Ensure images are block elements */
-            clear: both; /* Clear any floats */
-        }
-
-        /* Ensure paragraphs in bot messages have proper spacing */
-        .bot-message p {
-            margin: 0.8em 0;
-            line-height: 1.5;
-        }
-
-        /* Style for text sections */
-        .bot-message p + img {
-            margin-top: 0.5em; /* Reduce space between text and its related image */
-        }
-
-        .bot-message img + p {
-            margin-top: 1.2em; /* Add more space after image before next text section */
-        }
-
-        /* Animation cho hình ảnh khi load */
-        .bot-message img {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: imageAppear 0.5s ease forwards;
-        }
-
-        @keyframes imageAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Thêm style cho warning và note boxes */
-        .warning-box {
-            background: linear-gradient(135deg,
-                rgba(255, 82, 82, 0.1) 0%,
-                rgba(255, 82, 82, 0.05) 100%
-            );
-            border-left: 4px solid #FF5252;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .note-box {
-            background: linear-gradient(135deg,
-                rgba(33, 150, 243, 0.1) 0%,
-                rgba(33, 150, 243, 0.05) 100%
-            );
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
-
-        /* Style cho technical specifications */
-        .specs-table {
+        .progress-bar {
             width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .specs-table th,
-        .specs-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .specs-table th {
-            background: rgba(43, 92, 151, 0.1);
-            font-weight: 600;
-        }
-
-        /* Thêm dropdown chọn model vào input-container */
-        .model-select {
-            padding: 10px 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(74, 144, 226, 0.2);
-            background: rgba(255, 255, 255, 0.7);
-            margin-right: 10px;
-            font-size: 14px;
-            color: #2B5C97;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .model-select:hover {
-            border-color: #FFA726;
-            box-shadow: 0 0 0 3px rgba(255, 167, 38, 0.15);
-        }
-
-        .model-select:focus {
-            outline: none;
-            border-color: #4A90E2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
-        }
-
-        .model-select optgroup {
-            font-weight: 600;
-            color: #2B5C97;
-        }
-
-        .model-select option {
-            padding: 8px;
-            font-weight: normal;
-        }
-
-        @media screen and (max-width: 768px) {
-            .model-select {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            #input-container {
-                flex-wrap: wrap;
-            }
-        }
-
-        /* Model Selector Styles */
-        .model-selector {
-            position: relative;
-            display: flex;
-            gap: 10px;
-            margin-right: 15px;
-        }
-
-        .model-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(74, 144, 226, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .model-button.active {
-            background: linear-gradient(135deg, #4A90E2, #FFA726);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.25);
-        }
-
-        .model-button i {
-            font-size: 16px;
-        }
-
-        .model-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 8px 0;
-            margin-top: 8px;
-            min-width: 200px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .model-dropdown.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .model-option {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .model-option:hover {
-            background: rgba(74, 144, 226, 0.1);
-        }
-
-        .model-option.selected {
-            background: rgba(74, 144, 226, 0.2);
-            font-weight: 500;
-        }
-
-        /* Animation for dropdowns */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .model-dropdown.show {
-            animation: fadeIn 0.3s ease forwards;
-        }
-
-        /* Responsive styles */
-        @media screen and (max-width: 768px) {
-            .model-selector {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            .model-button {
-                flex: 1;
-                justify-content: center;
-            }
-            
-            .model-dropdown {
-                width: 100%;
-            }
-        }
-
-        /* Add CSS for thinking indicator */
-        .thinking-indicator {
-            font-style: italic;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        
-        .thinking-text {
-            display: inline-block;
-            animation: thinking-fade 1.5s infinite;
-        }
-        
-        @keyframes thinking-fade {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-
-        /* Style cho citations */
-        .page-citation {
-            color: #4A90E2;
-            cursor: pointer;
-            position: relative;
-            display: inline-block;
-            padding: 2px 4px;
+            height: 8px;
             background: rgba(74, 144, 226, 0.1);
             border-radius: 4px;
-        }
-
-        .page-citation:hover {
-            background: rgba(74, 144, 226, 0.2);
-        }
-
-        /* Style cho preview image */
-        .preview-image {
-            position: fixed;
-            max-width: 300px;
-            max-height: 300px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            pointer-events: none;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease, visibility 0.2s ease;
-            z-index: 1000;
-            border: 2px solid white;
-        }
-
-        .preview-image.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Style cho citations container */
-        .citations {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        /* Style cho modal */
-        .page-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            position: relative;
-            max-width: 95%;
-            max-height: 95vh;
-            background: transparent;
-            padding: 0;
-            border-radius: 12px;
             overflow: hidden;
+            margin-bottom: 10px;
         }
 
-        .modal-image {
-            max-width: 100%;
-            max-height: 95vh;
-            object-fit: contain;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4A90E2, #FFA726);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .document-id {
+            background: rgba(74, 144, 226, 0.1);
+            padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            word-break: break-all;
         }
 
-        .close-button {
+        .document-id strong {
+            color: #2B5C97;
+        }
+
+        .error-message {
+            color: #FF5252;
+            background: rgba(255, 82, 82, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-icon {
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        /* Add image loading styles */
+        .chat-image-container {
+            position: relative;
+            display: inline-block;
+            min-width: 100px;
+            min-height: 100px;
+            margin: 10px 0;
+        }
+
+        .chat-image {
+            max-width: 100%;
+            border-radius: 8px;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-loading {
             position: absolute;
-            top: -15px;
-            right: -15px;
-            width: 30px;
-            height: 30px;
-            background: #FF5252;
-            border: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4A90E2;
             border-radius: 50%;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
+            animation: spin 1s linear infinite;
+        }
+
+        .image-placeholder {
+            background: rgba(74, 144, 226, 0.1);
+            border: 2px dashed #4A90E2;
+            border-radius: 8px;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            color: #4A90E2;
+            font-size: 14px;
         }
 
-        .close-button:hover {
-            background: #FF1744;
-            transform: scale(1.1);
-        }
-
-        /* Add styles for message images */
-        .message-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .message-image:hover {
-            transform: scale(1.02);
-        }
-
-        .image-container {
-            margin: 10px 0;
-            position: relative;
-            display: inline-block;
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
     </style>
-
-    <!-- Thêm template cho product card -->
-    <template id="product-card-template">
-        <div class="product-card">
-            <img class="product-image" src="" alt="Product image">
-            <div class="product-info">
-                <h3 class="product-title"></h3>
-                <p class="product-description"></p>
-                <div class="product-price"></div>
-            </div>
-        </div>
-    </template>
-
-    <!-- Thêm Font Awesome cho icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="chat-wrapper">
+    <div class="upload-wrapper">
         <h1>パナソニック パソコン取扱説明書アシスタント</h1>
-        <p class="subtitle">パナソニックパソコンの取扱説明書についてお気軽にお尋ねください</p>
-        <div id="chat-container"></div>
-        <div id="input-container">
-            <!-- Thêm model selector container -->
-            <div class="model-selector">
-                <!-- Base Model Button -->
-                <div class="model-button" id="base-model-btn" onclick="toggleBaseModels()">
-                    <i class="fas fa-microchip"></i>
-                    <span>Base</span>
-                </div>
-                
-                <!-- Reasoning Model Button -->
-                <div class="model-button" id="reasoning-model-btn" onclick="toggleReasoningModels()">
-                    <i class="fas fa-brain"></i>
-                    <span>Reasoning</span>
-                </div>
-
-                <!-- Base Models Dropdown -->
-                <div class="model-dropdown" id="base-models-dropdown">
-                    <div class="model-option" onclick="selectModel('default')">Default Model</div>
-                    <div class="model-option" onclick="selectModel('GPT_4O_MINI')">GPT-4o Mini</div>
-                    <div class="model-option" onclick="selectModel('CLAUDE_3_5_HAIKU')">Claude 3.5 Haiku</div>
-                    <div class="model-option" onclick="selectModel('CLAUDE_3_5_SONNET')">Claude 3.5 Sonnet</div>
-                    <div class="model-option" onclick="selectModel('GEMINI_PRO_1_5')">Gemini Pro 1.5</div>
-                    <div class="model-option" onclick="selectModel('GEMINI_2_0_FLASH_001')">Gemini 2.0 Flash</div>
-                    <div class="model-option" onclick="selectModel('GEMINI_2_0_PRO_EXP_02_05')">Gemini 2.0 Pro</div>
-
-                </div>
-
-                <!-- Reasoning Models Dropdown -->
-                <div class="model-dropdown" id="reasoning-models-dropdown">
-                    <div class="model-option" onclick="selectModel('CLAUDE_3_7_SONNET')">Claude 3.7 Sonnet</div>
-                    <div class="model-option" onclick="selectModel('GEMINI_2_5_PRO_EXP_03_25')">Gemini 2.5 Pro</div>
-                    
-                </div>
+        
+        <div class="upload-section">
+            <div class="input-group">
+                <input type="text" id="pdf-url" placeholder="PDFファイルのURLを入力してください">
+                <button onclick="uploadPDF()" id="upload-btn">
+                    <i class="fas fa-upload"></i>
+                    アップロード
+                </button>
             </div>
-
-            <input type="text" 
-                   id="message-input" 
-                   placeholder="メッセージを入力してください..." 
-                   autofocus>
-            <button onclick="sendMessage()" aria-label="送信"></button>
         </div>
-    </div>
 
-    <!-- Thêm modal vào body -->
-    <div class="page-modal" id="pageModal">
-        <div class="modal-content">
-            <button class="close-button" onclick="closeModal()">×</button>
-            <img class="modal-image" id="modalImage" src="" alt="Page">
+        <div class="progress-section" id="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="status-text" id="status-text">PDFをアップロード中...</div>
         </div>
+
+        <div class="result-section" id="result-section">
+            <div class="document-id" id="document-id"></div>
+            <button onclick="createChatbot()" id="create-chatbot-btn">
+                <i class="fas fa-robot"></i>
+                チャットボットを作成
+            </button>
+        </div>
+
+        <div class="error-message" id="error-message"></div>
     </div>
 
     <script>
-        let chatHistory = [];
-        const chatContainer = document.getElementById('chat-container');
-        const messageInput = document.getElementById('message-input');
+        let documentId = null;
 
-        marked.setOptions({
-            headerIds: false,
-            mangle: false,
-            sanitize: false,
-            breaks: true,
-            gfm: true
-        });
-
-        function addMessage(message, isUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            
-            if (!isUser) {
-                const messageContent = document.createElement('div');
-                
-                // Add model tag if present
-                if (message.model && message.model !== 'default') {
-                    const modelTag = document.createElement('small');
-                    modelTag.className = 'model-tag';
-                    modelTag.textContent = message.model;
-                    messageContent.appendChild(modelTag);
-                }
-
-                // Get the actual message content
-                const messageText = message.message || message;
-                
-                // Split content by markdown image syntax, citations, and regular text
-                const parts = messageText.split(/(!\[.*?\]\(.*?\)|\[Page \d+(?:, \d+)*\])/g);
-                
-                parts.forEach(part => {
-                    if (part.match(/\[Page \d+(?:, \d+)*\]/)) {
-                        // Handle citations
-                        const citation = document.createElement('span');
-                        citation.className = 'page-citation';
-                        citation.textContent = part;
-                        messageContent.appendChild(citation);
-                    } else if (part.match(/!\[(.*?)\]\((.*?)\)/)) {
-                        // Handle images with markdown syntax
-                        const [, altText, imgUrl] = part.match(/!\[(.*?)\]\((.*?)\)/);
-                        const imgContainer = document.createElement('div');
-                        imgContainer.className = 'image-container';
-                        
-                        const img = document.createElement('img');
-                        img.src = imgUrl;
-                        img.alt = altText;
-                        img.loading = 'lazy';
-                        img.className = 'message-image';
-                        
-                        // Add click handler for image zoom
-                        img.onclick = () => {
-                            const modal = document.getElementById('pageModal');
-                            const modalImage = document.getElementById('modalImage');
-                            modalImage.src = imgUrl;
-                            modalImage.alt = altText;
-                            modal.style.display = 'flex';
-                        };
-                        
-                        imgContainer.appendChild(img);
-                        messageContent.appendChild(imgContainer);
-                    } else if (part.trim()) {
-                        // Handle regular text with markdown parsing
-                        const textContainer = document.createElement('div');
-                        textContainer.innerHTML = marked.parse(part);
-                        messageContent.appendChild(textContainer);
-                    }
-                });
-                
-                messageDiv.appendChild(messageContent);
-            } else {
-                messageDiv.textContent = message;
+        async function uploadPDF() {
+            const pdfUrl = document.getElementById('pdf-url').value.trim();
+            if (!pdfUrl) {
+                showError('PDFのURLを入力してください');
+                return;
             }
-            
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return messageDiv;
+
+            // Redirect to upload.html with the PDF URL
+            window.location.href = `/v1/static/upload.html?pdf_url=${encodeURIComponent(pdfUrl)}`;
         }
 
-        function scrollToBottom() {
-            // Đảm bảo cuộn xuống mượt mà
-            chatContainer.scrollTo({
-                top: chatContainer.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-
-        let currentModel = 'default';
-        let activeDropdown = null;
-
-        function toggleBaseModels() {
-            const baseBtn = document.getElementById('base-model-btn');
-            const reasoningBtn = document.getElementById('reasoning-model-btn');
-            const baseDropdown = document.getElementById('base-models-dropdown');
-            const reasoningDropdown = document.getElementById('reasoning-models-dropdown');
-
-            if (activeDropdown === baseDropdown) {
-                baseDropdown.classList.remove('show');
-                baseBtn.classList.remove('active');
-                activeDropdown = null;
-            } else {
-                // Hide reasoning dropdown if open
-                reasoningDropdown.classList.remove('show');
-                reasoningBtn.classList.remove('active');
-                
-                // Show base dropdown
-                baseDropdown.classList.add('show');
-                baseBtn.classList.add('active');
-                activeDropdown = baseDropdown;
-            }
-        }
-
-        function toggleReasoningModels() {
-            const baseBtn = document.getElementById('base-model-btn');
-            const reasoningBtn = document.getElementById('reasoning-model-btn');
-            const baseDropdown = document.getElementById('base-models-dropdown');
-            const reasoningDropdown = document.getElementById('reasoning-models-dropdown');
-
-            if (activeDropdown === reasoningDropdown) {
-                reasoningDropdown.classList.remove('show');
-                reasoningBtn.classList.remove('active');
-                activeDropdown = null;
-            } else {
-                // Hide base dropdown if open
-                baseDropdown.classList.remove('show');
-                baseBtn.classList.remove('active');
-                
-                // Show reasoning dropdown
-                reasoningDropdown.classList.add('show');
-                reasoningBtn.classList.add('active');
-                activeDropdown = reasoningDropdown;
-            }
-        }
-
-        function selectModel(model) {
-            currentModel = model;
-            
-            // Clear chat history and chat container
-            chatHistory = [];
-            chatContainer.innerHTML = '';
-            
-            // Add welcome message for new model
-            const welcomeMessage = "こんにちは！パナソニックパソコンの取扱説明書アシスタントです。どのようなことでもお気軽にお尋ねください。";
-            addMessage(welcomeMessage, false);
-            chatHistory.push({ role: 'assistant', message: welcomeMessage });
-            
-            // Update visual selection
-            document.querySelectorAll('.model-option').forEach(option => {
-                option.classList.remove('selected');
-                if (option.textContent.includes(model)) {
-                    option.classList.add('selected');
-                }
-            });
-
-            // Hide dropdowns and remove active states
-            document.querySelectorAll('.model-dropdown').forEach(dropdown => {
-                dropdown.classList.remove('show');
-            });
-            document.querySelectorAll('.model-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Update button text to show selected model
-            const baseBtn = document.getElementById('base-model-btn');
-            const reasoningBtn = document.getElementById('reasoning-model-btn');
-            
-            if (model === 'default') {
-                baseBtn.querySelector('span').textContent = 'Base';
-                reasoningBtn.querySelector('span').textContent = 'Reasoning';
-            } else {
-                const modelName = document.querySelector(`.model-option[onclick*="${model}"]`).textContent;
-                if (model === 'CLAUDE_3_7_SONNET' || model === 'GEMINI_2_5_PRO_EXP_03_25') {
-                    reasoningBtn.querySelector('span').textContent = `Reasoning (${modelName.split(' ')[0]})`;
-                    baseBtn.querySelector('span').textContent = 'Base';
-                } else {
-                    baseBtn.querySelector('span').textContent = `Base (${modelName.split(' ')[0]})`;
-                    reasoningBtn.querySelector('span').textContent = 'Reasoning';
-                }
+        async function createChatbot() {
+            if (!documentId) {
+                showError('Document IDが見つかりません');
+                return;
             }
 
-            // Add active class to selected button
-            if (model === 'CLAUDE_3_7_SONNET' || model === 'GEMINI_2_5_PRO_EXP_03_25') {
-                reasoningBtn.classList.add('active');
-                baseBtn.classList.remove('active');
-            } else if (model !== 'default') {
-                baseBtn.classList.add('active');
-                reasoningBtn.classList.remove('active');
-            } else {
-                baseBtn.classList.remove('active');
-                reasoningBtn.classList.remove('active');
-            }
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.model-selector')) {
-                document.querySelectorAll('.model-dropdown').forEach(dropdown => {
-                    dropdown.classList.remove('show');
-                });
-                document.querySelectorAll('.model-button').forEach(btn => {
-                    if (!btn.classList.contains('selected')) {
-                        btn.classList.remove('active');
-                    }
-                });
-                activeDropdown = null;
-            }
-        });
-
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
-
-            const sendButton = document.querySelector('button');
-            messageInput.disabled = true;
-            sendButton.disabled = true;
-
-            addMessage(message, true);
-            messageInput.value = '';
+            const createBtn = document.getElementById('create-chatbot-btn');
+            createBtn.disabled = true;
+            hideError();
 
             try {
-                const botMessageDiv = document.createElement('div');
-                botMessageDiv.className = 'message bot-message';
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'typing-indicator';
-                typingIndicator.innerHTML = `
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                `;
-                botMessageDiv.appendChild(typingIndicator);
-                chatContainer.appendChild(botMessageDiv);
-                scrollToBottom();
-
-                const requestBody = {
-                    message: message,
-                    chat_history: chatHistory,
-                    model: currentModel === 'default' ? null : currentModel
-                };
-
-                // Choose the appropriate endpoint based on the model
-                const endpoint = '/v1/chat-stream';
-
-                const response = await fetch(endpoint, {
+                const response = await fetch('/v1/chatbot/create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({ document_id: documentId })
                 });
 
-                let isFirstChunk = true;
-                let responseText = '';
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n');
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const rawData = line.slice(6);
-                                if (!rawData.trim()) continue;
-
-                                const data = JSON.parse(rawData);
-                                
-                                // Handle first chunk
-                                if (isFirstChunk && (data.text || data.error)) {
-                                    typingIndicator.remove();
-                                    isFirstChunk = false;
-                                }
-
-                                // Handle error
-                                if (data.error) {
-                                    console.error('Error from server:', data.error);
-                                    botMessageDiv.innerHTML = `<div class="error-message">Error: ${data.error}</div>`;
-                                    break;
-                                }
-
-                                // Handle text content
-                                if (data.text) {
-                                    responseText += data.text;
-                                    if (currentModel !== 'default') {
-                                        botMessageDiv.innerHTML = `
-                                            <small class="model-tag">${currentModel === 'react_agent' ? 'ReAct Agent' : currentModel}</small>
-                                            ${marked.parse(responseText)}
-                                        `;
-                                    } else {
-                                        botMessageDiv.innerHTML = marked.parse(responseText);
-                                    }
-                                    scrollToBottom();
-                                }
-
-                                // Handle stream end
-                                if (data.done) {
-                                    break;
-                                }
-                            } catch (e) {
-                                console.error('Error processing chunk:', e, 'Raw data:', line.slice(6));
-                            }
-                        }
-                    }
+                if (!response.ok) {
+                    throw new Error('チャットボットの作成に失敗しました');
                 }
 
-                // Save to chat history
-                if (responseText) {
-                    chatHistory.push(
-                        { role: 'user', message: message },
-                        { 
-                            role: 'assistant', 
-                            message: responseText,
-                            model: currentModel
-                        }
-                    );
-                }
+                const data = await response.json();
+                const chatbotId = data.chatbot_id;
+
+                // Redirect to chat page
+                window.location.href = `/v1/static/chat.html?chatbot_id=${chatbotId}`;
 
             } catch (error) {
                 console.error('Error:', error);
-                addMessage('サーバー接続エラーが発生しました', false);
-            } finally {
-                messageInput.disabled = false;
-                sendButton.disabled = false;
-                messageInput.focus();
+                showError(error.message || 'チャットボットの作成に失敗しました');
+                createBtn.disabled = false;
             }
         }
 
-        // Thêm event listener cho phím Enter
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !messageInput.disabled) {
-                sendMessage();
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // Handle Enter key in URL input
+        document.getElementById('pdf-url').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                uploadPDF();
             }
-        });
-
-        // Add welcome message when the page loads
-        window.addEventListener('load', () => {
-            const welcomeMessage = "こんにちは！パナソニックパソコンの取扱説明書アシスタントです。どのようなことでもお気軽にお尋ねください。";
-            addMessage(welcomeMessage, false);
-            chatHistory.push({ role: 'assistant', message: welcomeMessage });
-            messageInput.focus();
-        });
-
-        // Đảm bảo input luôn được focus
-        function maintainFocus() {
-            messageInput.focus();
-        }
-
-        // Thêm event listener cho việc mất focus
-        messageInput.addEventListener('blur', () => {
-            // Đợi một chút để tránh conflict với các tương tác khác
-            setTimeout(maintainFocus, 100);
-        });
-
-        // Chỉ cho phép mất focus khi người dùng đang tương tác với các phần tử khác
-        document.addEventListener('mousedown', (e) => {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('.message')) {
-                return;
-            }
-            maintainFocus();
-        });
-
-        // Tạo Set chứa các page numbers có sẵn (1-74, loại trừ 2,3,4)
-        const availablePages = new Set(
-            Array.from({length: 74}, (_, i) => i + 1) // Tạo array 1-74
-                .filter(page => ![2,3,4].includes(page)) // Loại bỏ page 2,3,4
-        );
-
-        // Hàm kiểm tra page tồn tại
-        function isPageAvailable(pageNum) {
-            return availablePages.has(parseInt(pageNum));
-        }
-
-        // Thêm hàm xử lý bỏ thẻ co
-        function removeCoTags(text) {
-            if (!text) return text;
-            // Xử lý các thẻ có dạng <co: X,Y,Z>text</co: X,Y,Z>
-            text = text.replace(/<co:\s*[\d,]+>(.*?)<\/co:\s*[\d,]+>/g, '$1');
-            
-            // Xử lý các thẻ có dạng <co: X,Y,Z>text (không có thẻ đóng)
-            text = text.replace(/<co:\s*[\d,]+>(.*?)(?=<co:|$)/g, '$1');
-            
-            return text;
-        }
-
-        // Thêm hàm xử lý citations
-        function formatPageCitations(text) {
-            if (!text) return text;
-            // Tìm và thay thế các citations dạng [Page X,Y,Z] hoặc [Page X,Y]
-            return text.replace(/\[Page\s+(\d+(?:,\s*\d+)*)\]/g, function(match, pages) {
-                // Tách các số trang và chỉ giữ lại những trang tồn tại
-                const validPages = pages.split(',')
-                                      .map(page => page.trim())
-                                      .filter(page => isPageAvailable(page))
-                                      .map(page => `[Page ${page}]`);
-                
-                // Nếu không có trang nào hợp lệ, trả về chuỗi rỗng
-                return validPages.length > 0 ? validPages.join(' ') : '';
-            });
-        }
-
-        // Sửa lại hàm marked.parse
-        const originalMarkedParse = marked.parse;
-        marked.parse = function(text) {
-            if (!text) return '';
-            
-            // Xử lý bỏ thẻ co trước
-            text = removeCoTags(text);
-            
-            // Xử lý citations
-            text = formatPageCitations(text);
-            
-            // Chuyển đổi citations thành spans có thể click
-            text = text.replace(/\[Page (\d+)\]/g, (match, page) => {
-                return `<span class="page-citation" data-page="${page}">[Page ${page}]</span>`;
-            });
-            
-            return originalMarkedParse(text);
-        };
-
-        // Tạo và quản lý preview image
-        const previewImage = (() => {
-            const img = document.createElement('img');
-            img.className = 'preview-image';
-            document.body.appendChild(img);
-            return img;
-        })();
-
-        // Sửa lại hàm xử lý click cho citations
-        function handleCitationClick(e) {
-            const citation = e.target.closest('.page-citation');
-            if (!citation) return;
-
-            const pageNum = citation.dataset.page;
-            const modal = document.getElementById('pageModal');
-            const modalImage = document.getElementById('modalImage');
-            
-            modalImage.src = `/v1/static/images/page_${pageNum}.jpg`;
-            modal.style.display = 'flex';
-        }
-
-        // Hàm đóng modal
-        function closeModal() {
-            const modal = document.getElementById('pageModal');
-            modal.style.display = 'none';
-        }
-
-        // Thêm event listeners
-        document.addEventListener('click', handleCitationClick);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // Đóng modal khi click bên ngoài
-        document.getElementById('pageModal').addEventListener('click', (e) => {
-            if (e.target.id === 'pageModal') closeModal();
         });
     </script>
 </body>

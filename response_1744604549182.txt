@@ -1,0 +1,28 @@
+# Character Distribution in MELD Dataset
+
+## Emotion Distribution
+| Emotion | Number of Utterances |
+|---------|---------------------|
+| Neutral | 6,436 |
+| Happy/Joy | 2,308 |
+| Surprise | 1,636 |
+| Anger | 1,607 |
+| Sadness | 1,002 |
+| Disgust | 361 |
+
+![Emotion Distribution Chart](img-2.jpeg)
+
+## Dataset Comparison: MELD vs IEMOCAP
+
+| Metric | MELD | IEMOCAP |
+|--------|------|----------|
+| Vocabulary Size | 10,643 | 3,598 |
+| Avg Utterance Length | 8.0 words | 15.8 words |
+| Avg Conversation Length | 9.6 utterances | 49.2 utterances |
+
+## Dataset Overview
+- Created as extension of EmotionLines dataset
+- Contains ~13,000 utterances from 1,433 dialogues
+- Source: TV series Friends
+- Uses 7 emotion categories: anger, disgust, fear, joy, neutral, sadness, and surprise
+
