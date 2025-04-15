@@ -26,6 +26,8 @@ from database.document import create_document, get_document_by_id, get_all_docum
 # Import chunk processing
 from routes.chunk import process_json_file
 
+from commons.cloudflare_upload import simple_upload_to_cloudflare
+
 router = APIRouter()
 
 class PDFUploadRequest(BaseModel):
@@ -202,6 +204,45 @@ async def upload_pdf(request: PDFUploadRequest):
         
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload-file")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        logger.info(f"Starting file upload process for file: {file.filename}")
+        
+        # Create temp directory if it doesn't exist
+        temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'temp')
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        # Generate unique filename
+        file_extension = os.path.splitext(file.filename)[1]
+        temp_filename = f"{uuid.uuid4()}{file_extension}"
+        temp_filepath = os.path.join(temp_dir, temp_filename)
+        
+        # Save uploaded file temporarily
+        try:
+            with open(temp_filepath, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+        finally:
+            file.file.close()
+            
+        # Upload to Cloudflare
+        logger.info("Uploading file to Cloudflare storage")
+        cloudflare_path = f"pdf/{temp_filename}"
+        pdf_url = simple_upload_to_cloudflare(temp_filepath, cloudflare_path)
+        
+        # Clean up temp file
+        if os.path.exists(temp_filepath):
+            os.remove(temp_filepath)
+            
+        if not pdf_url:
+            raise HTTPException(status_code=500, detail="Failed to upload file to storage")
+            
+        return JSONResponse(content={"pdf_url": pdf_url})
+        
+    except Exception as e:
+        logger.error(f"Error uploading file: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 # Lưu response vào file TXT

@@ -75,6 +75,28 @@
             background: rgba(255, 255, 255, 0.7);
         }
 
+        input[type="text"][readonly] {
+            background: rgba(255, 255, 255, 0.5);
+            cursor: default;
+        }
+
+        .file-upload-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-container {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        #pdf-file-name {
+            flex: 1;
+            cursor: default;
+        }
+
         button {
             padding: 15px 25px;
             background: linear-gradient(135deg, #4A90E2, #FFA726);
@@ -86,11 +108,54 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        button.secondary {
+            background: transparent;
+            border: 1px solid #4A90E2;
+            color: #4A90E2;
+        }
+
+        button.secondary:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upload-section h2 {
+            color: #2B5C97;
+            font-size: 18px;
+            margin: 0 0 10px 0;
+        }
+
+        .upload-method {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .or-divider {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
         }
 
         button:disabled {
@@ -214,12 +279,35 @@
         <h1>パナソニック パソコン取扱説明書アシスタント</h1>
         
         <div class="upload-section">
-            <div class="input-group">
-                <input type="text" id="pdf-url" placeholder="PDFファイルのURLを入力してください">
-                <button onclick="uploadPDF()" id="upload-btn">
-                    <i class="fas fa-upload"></i>
-                    アップロード
-                </button>
+            <div class="upload-method">
+                <h2>URLからアップロード</h2>
+                <div class="input-group">
+                    <input type="text" id="pdf-url" placeholder="PDFファイルのURLを入力してください">
+                    <button onclick="uploadPDF()" id="upload-btn">
+                        <i class="fas fa-upload"></i>
+                        URLアップロード
+                    </button>
+                </div>
+            </div>
+
+            <div class="or-divider">または</div>
+
+            <div class="upload-method">
+                <h2>ファイルをアップロード</h2>
+                <div class="file-upload-group">
+                    <input type="file" id="pdf-file" accept=".pdf" style="display: none">
+                    <div class="file-input-container">
+                        <input type="text" id="pdf-file-name" placeholder="PDFファイルを選択してください" readonly>
+                        <button onclick="document.getElementById('pdf-file').click()" id="choose-file-btn" class="secondary">
+                            <i class="fas fa-file-pdf"></i>
+                            ファイル選択
+                        </button>
+                    </div>
+                    <button onclick="uploadPDFFile()" id="upload-file-btn" disabled>
+                        <i class="fas fa-upload"></i>
+                        アップロード
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -243,6 +331,49 @@
 
     <script>
         let documentId = null;
+
+        // Add file input change handler
+        document.getElementById('pdf-file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || '';
+            document.getElementById('pdf-file-name').value = fileName;
+            document.getElementById('upload-file-btn').disabled = !fileName;
+        });
+
+        async function uploadPDFFile() {
+            const fileInput = document.getElementById('pdf-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                showError('PDFファイルを選択してください');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Upload to server
+                const uploadResponse = await fetch('/v1/pdf/upload-file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('ファイルのアップロードに失敗しました');
+                }
+
+                const data = await uploadResponse.json();
+                if (!data.pdf_url) {
+                    throw new Error('PDFのURLが取得できませんでした');
+                }
+
+                // Redirect to upload.html with the PDF URL
+                window.location.href = `/v1/static/upload.html?pdf_url=${encodeURIComponent(data.pdf_url)}`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'ファイルのアップロードに失敗しました');
+            }
+        }
 
         async function uploadPDF() {
             const pdfUrl = document.getElementById('pdf-url').value.trim();
